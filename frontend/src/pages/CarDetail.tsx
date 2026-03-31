@@ -20,7 +20,7 @@ const STATUS_COLORS: Record<string, string> = {
   reservado: 'bg-[#7db7ff]/20 text-[#edf4ff]',
 };
 const STATUS_LABELS: Record<string, string> = {
-  disponible: 'Disponible', vendido: 'Vendido', en_reparacion: 'En Reparación', reservado: 'Reservado'
+  disponible: 'Disponible', vendido: 'Vendido', en_reparacion: 'Preaparacion', reservado: 'Reservado'
 };
 
 export default function CarDetail() {

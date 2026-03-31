@@ -94,7 +94,7 @@ export const DOC_TYPES = [
 
 export const CAR_STATUS = [
   { value: 'disponible', label: 'Disponible' },
-  { value: 'en_reparacion', label: 'En Reparación' },
+  { value: 'en_reparacion', label: 'Preaparacion' },
   { value: 'reservado', label: 'Reservado' },
   { value: 'vendido', label: 'Vendido' },
 ];

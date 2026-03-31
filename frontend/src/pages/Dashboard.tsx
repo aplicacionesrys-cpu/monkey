@@ -32,7 +32,7 @@ export default function Dashboard() {
 
   const statusColumns = [
     { key: 'disponible', label: 'Disponibles', dot: 'bg-[#2f3443]' },
-    { key: 'en_reparacion', label: 'En reparación', dot: 'bg-[#b31234]' },
+    { key: 'en_reparacion', label: 'Preaparacion', dot: 'bg-[#b31234]' },
     { key: 'reservado', label: 'Reservados', dot: 'bg-[#596076]' },
     { key: 'vendido', label: 'Vendidos', dot: 'bg-[#1f2634]' },
   ] as const;
@@ -125,10 +125,10 @@ export default function Dashboard() {
           />
           <StatCard
             icon={<Wrench className="w-7 h-7 text-[#b31234]" />}
-            label="En Reparación"
+            label="Preaparacion"
             value={enReparacion}
             tone="copper"
-            iconLabel="Filtrar en reparación"
+            iconLabel="Filtrar preaparacion"
             onIconClick={() => navigate('/cars?status=en_reparacion')}
           />
           <StatCard
@@ -274,7 +274,7 @@ function StatusBadge({ status }: { status: string }) {
     reservado: 'bg-[#3f5170]/30 text-[#d3dded]',
   };
   const labels: Record<string, string> = {
-    disponible: 'Disponible', vendido: 'Vendido', en_reparacion: 'En Reparación', reservado: 'Reservado'
+    disponible: 'Disponible', vendido: 'Vendido', en_reparacion: 'Preaparacion', reservado: 'Reservado'
   };
   return (
     <span className={`px-3 py-1 rounded-full text-xs font-medium ${map[status] || 'bg-gray-100 text-gray-600'}`}>

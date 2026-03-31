@@ -13,7 +13,7 @@ const STATUS_COLORS: Record<string, string> = {
   reservado: 'bg-[#3f5170]/30 text-[#d3dded]',
 };
 const STATUS_LABELS: Record<string, string> = {
-  disponible: 'Disponible', vendido: 'Vendido', en_reparacion: 'En Reparación', reservado: 'Reservado'
+  disponible: 'Disponible', vendido: 'Vendido', en_reparacion: 'Preaparacion', reservado: 'Reservado'
 };
 const STRIP_CLASS: Record<string, string> = {
   disponible: 'neo-accent-teal',
@@ -108,7 +108,7 @@ export default function CarsList() {
           >
             <option value="">Todos los estados</option>
             <option value="disponible">Disponible</option>
-            <option value="en_reparacion">En Reparación</option>
+            <option value="en_reparacion">Preaparacion</option>
             <option value="reservado">Reservado</option>
             <option value="vendido">Vendido</option>
           </select>
