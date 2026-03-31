@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../api';
 import { CAR_STATUS } from '../types';
@@ -6,6 +6,8 @@ import { CAR_BRANDS, CAR_CATALOG } from '../constants/carCatalog';
 import Navbar from '../components/Navbar';
 import toast from 'react-hot-toast';
 import { ArrowLeft, Save } from 'lucide-react';
+
+const CUSTOM_MODELS_STORAGE_KEY = 'custom_models_by_brand_v1';
 
 export default function CarForm() {
   const { id } = useParams();
@@ -18,6 +20,40 @@ export default function CarForm() {
   });
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(isEdit);
+  const [customCatalog, setCustomCatalog] = useState<Record<string, string[]>>({});
+  const [newModel, setNewModel] = useState('');
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(CUSTOM_MODELS_STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        setCustomCatalog(parsed as Record<string, string[]>);
+      }
+    } catch {
+      // Si el storage esta corrupto, seguimos con el catalogo base.
+    }
+  }, []);
+
+  const catalog = useMemo(() => {
+    const merged: Record<string, string[]> = {};
+    const allBrands = new Set([...Object.keys(CAR_CATALOG), ...Object.keys(customCatalog)]);
+
+    allBrands.forEach((brand) => {
+      const baseModels = CAR_CATALOG[brand] || [];
+      const customModels = customCatalog[brand] || [];
+      merged[brand] = Array.from(new Set([...baseModels, ...customModels]))
+        .sort((a, b) => a.localeCompare(b));
+    });
+
+    return merged;
+  }, [customCatalog]);
+
+  const brandOptions = useMemo(
+    () => Object.keys(catalog).sort((a, b) => a.localeCompare(b)),
+    [catalog]
+  );
 
   useEffect(() => {
     if (!isEdit) return;
@@ -43,7 +79,7 @@ export default function CarForm() {
   const handleBrandChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const nextBrand = e.target.value;
     setForm(prev => {
-      const nextModels = CAR_CATALOG[nextBrand] || [];
+      const nextModels = catalog[nextBrand] || [];
       const keepCurrentModel = prev.model && nextModels.includes(prev.model);
       return {
         ...prev,
@@ -53,7 +89,40 @@ export default function CarForm() {
     });
   };
 
-  const modelOptions = CAR_CATALOG[form.brand] || [];
+  const modelOptions = catalog[form.brand] || [];
+
+  const handleAddModel = () => {
+    const modelName = newModel.trim();
+    if (!form.brand) {
+      toast.error('Selecciona una marca primero');
+      return;
+    }
+    if (!modelName) {
+      toast.error('Escribe un modelo valido');
+      return;
+    }
+
+    const exists = (catalog[form.brand] || []).some(
+      (m) => m.toLowerCase() === modelName.toLowerCase()
+    );
+    if (exists) {
+      toast.error('Ese modelo ya existe en la marca seleccionada');
+      return;
+    }
+
+    setCustomCatalog((prev) => {
+      const next = {
+        ...prev,
+        [form.brand]: [...(prev[form.brand] || []), modelName],
+      };
+      localStorage.setItem(CUSTOM_MODELS_STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+
+    setForm((prev) => ({ ...prev, model: modelName }));
+    setNewModel('');
+    toast.success(`Modelo agregado a ${form.brand}`);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,7 +186,7 @@ export default function CarForm() {
                   className="brand-input"
                 >
                   <option value="">Selecciona una marca</option>
-                  {CAR_BRANDS.map((brand) => (
+                  {brandOptions.map((brand) => (
                     <option key={brand} value={brand}>{brand}</option>
                   ))}
                 </select>
@@ -145,6 +214,29 @@ export default function CarForm() {
                     Sugerencias disponibles: {modelOptions.length}
                   </p>
                 )}
+              </div>
+
+              <div className="sm:col-span-2 rounded-[14px] border border-[#8fdcff]/25 bg-[#0f1f33]/55 p-4">
+                <p className="text-sm font-semibold text-[#eaf3ff]">Agregar modelo a una marca</p>
+                <p className="mt-1 text-xs text-[#c9daf4]">Se guarda en este navegador para futuros registros.</p>
+                <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                  <input
+                    type="text"
+                    value={newModel}
+                    onChange={(e) => setNewModel(e.target.value)}
+                    className="brand-input flex-1"
+                    placeholder={form.brand ? `Nuevo modelo para ${form.brand}` : 'Primero selecciona una marca'}
+                    disabled={!form.brand}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddModel}
+                    disabled={!form.brand}
+                    className="brand-button sm:w-auto disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Agregar modelo
+                  </button>
+                </div>
               </div>
 
               <Field label="Año" name="year" value={form.year} onChange={handle} placeholder="2020" type="number" />
