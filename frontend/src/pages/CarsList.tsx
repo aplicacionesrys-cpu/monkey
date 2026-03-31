@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import api from '../api';
 import { Car } from '../types';
-import { Car as CarIcon, Plus, Search, Trash2, Eye, UserRound, Clock3 } from 'lucide-react';
+import { Car as CarIcon, Plus, Search, Trash2, Eye, Clock3 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import toast from 'react-hot-toast';
 
@@ -154,8 +154,7 @@ export default function CarsList() {
                   <p className="neo-card-line font-semibold text-[#f0f4fb]">Inversión total: {fmt((car.purchase_price || 0) + (car.total_repair_cost || 0))}</p>
                 </div>
                 <div className="neo-card-meta">
-                  <span className="inline-flex items-center gap-1.5"><UserRound className="h-4 w-4" /> {car.vin ? 'VIN cargado' : 'Sin VIN'}</span>
-                  <span className="inline-flex items-center gap-1.5"><Clock3 className="h-4 w-4" /> {car.arrival_date || 'Sin fecha'}</span>
+                  <span className="inline-flex items-center gap-1.5"><Clock3 className="h-4 w-4" /> {car.arrival_date || 'Sin fecha de compra'}</span>
                 </div>
                 <div className="mt-4 flex gap-2">
                   <Link

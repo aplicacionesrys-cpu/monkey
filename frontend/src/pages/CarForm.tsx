@@ -150,7 +150,6 @@ export default function CarForm() {
               <Field label="Año" name="year" value={form.year} onChange={handle} placeholder="2020" type="number" />
               <Field label="Color" name="color" value={form.color} onChange={handle} placeholder="Blanco, Negro..." />
               <Field label="Patente" name="plate" value={form.plate} onChange={handle} placeholder="ABCD12" />
-              <Field label="VIN / Chasis" name="vin" value={form.vin} onChange={handle} placeholder="1HGBH41..." />
             </div>
           </Section>
 
@@ -158,7 +157,7 @@ export default function CarForm() {
           <Section title="Datos de Ingreso y Compra">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label="Kilometraje" name="km" value={form.km} onChange={handle} placeholder="150000" type="number" />
-              <Field label="Fecha de llegada" name="arrival_date" value={form.arrival_date} onChange={handle} type="date" />
+              <Field label="Fecha de compra" name="arrival_date" value={form.arrival_date} onChange={handle} type="date" />
               <Field label="Precio de Compra ($)" name="purchase_price" value={form.purchase_price} onChange={handle} placeholder="0" type="number" />
               <div>
                 <label className="block text-sm font-semibold text-[#eaf3ff] mb-1">Estado</label>

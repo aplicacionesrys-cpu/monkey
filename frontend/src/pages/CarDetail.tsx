@@ -190,9 +190,8 @@ export default function CarDetail() {
                 <DataField label="Año" value={car.year?.toString() || '-'} />
                 <DataField label="Color" value={car.color || '-'} />
                 <DataField label="Patente" value={car.plate || '-'} />
-                <DataField label="VIN/Chasis" value={car.vin || '-'} />
                 <DataField label="Kilometraje" value={car.km ? `${car.km.toLocaleString('es-CL')} km` : '-'} />
-                <DataField label="Fecha de llegada" value={car.arrival_date ? new Date(car.arrival_date + 'T00:00:00').toLocaleDateString('es-CL') : '-'} />
+                <DataField label="Fecha de compra" value={car.arrival_date ? new Date(car.arrival_date + 'T00:00:00').toLocaleDateString('es-CL') : '-'} />
                 <DataField label="Estado" value={STATUS_LABELS[car.status] || car.status} />
               </div>
               {car.notes && (

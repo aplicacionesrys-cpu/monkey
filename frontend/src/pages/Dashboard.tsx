@@ -168,7 +168,7 @@ export default function Dashboard() {
                   <p className="neo-card-line">{car.year || 'S/A'} · {car.color || 'Sin color'} · {car.km ? `${car.km.toLocaleString('es-CL')} km` : 'KM sin registro'}</p>
                   <p className="neo-card-line font-semibold text-[#f0f4fb]">Inversión: {fmt((car.purchase_price || 0) + (car.total_repair_cost || 0))}</p>
                   <div className="neo-card-meta">
-                    <span className="inline-flex items-center gap-1.5"><Clock3 className="h-4 w-4" /> {car.arrival_date || 'Sin fecha de llegada'}</span>
+                    <span className="inline-flex items-center gap-1.5"><Clock3 className="h-4 w-4" /> {car.arrival_date || 'Sin fecha de compra'}</span>
                   </div>
                   <div className={`neo-card-strip ${stripByStatus[car.status] || 'neo-accent-teal'}`} />
                 </Link>
