@@ -1,0 +1,264 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-ink: #f8fbff;
+  --brand-muted: #c3cee0;
+  --brand-line: rgba(129, 151, 186, 0.36);
+  --brand-accent: #00c2ff;
+  --brand-accent-deep: #ff5a36;
+  --brand-shadow: 0 22px 44px rgba(3, 8, 18, 0.4);
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  html {
+    background: #f3f4f6;
+    zoom: 1;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--brand-ink);
+    background:
+      linear-gradient(160deg, rgba(7, 14, 24, 0.86) 0%, rgba(10, 27, 44, 0.75) 44%, rgba(70, 26, 22, 0.62) 100%),
+      radial-gradient(circle at 16% 14%, rgba(255, 255, 255, 0.13), transparent 30%),
+      url('/dashboard-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+@layer components {
+  .site-shell {
+    min-height: 100vh;
+    background: transparent;
+  }
+
+  .page-frame {
+    @apply mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8;
+  }
+
+  .brand-card {
+    background: rgba(16, 24, 38, 0.9);
+    border: 1px solid var(--brand-line);
+    box-shadow: var(--brand-shadow);
+    @apply rounded-[16px];
+  }
+
+  .brand-panel {
+    background: rgba(12, 20, 33, 0.88);
+    border: 1px solid var(--brand-line);
+    @apply rounded-[14px] shadow-sm;
+  }
+
+  .brand-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-[10px] px-5 py-3 font-semibold text-white transition-all duration-200;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: linear-gradient(120deg, var(--brand-accent) 0%, #2e9eff 45%, var(--brand-accent-deep) 100%);
+    box-shadow: 0 12px 24px rgba(0, 194, 255, 0.32);
+  }
+
+  .brand-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px rgba(255, 90, 54, 0.34);
+  }
+
+  .brand-button-soft {
+    @apply inline-flex items-center justify-center gap-2 rounded-[10px] px-5 py-3 font-semibold transition-all duration-200;
+    background: rgba(18, 28, 43, 0.86);
+    color: #f3f7ff;
+    border: 1px solid rgba(110, 148, 205, 0.45);
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .brand-button-soft:hover {
+    background: rgba(28, 41, 62, 0.92);
+    border-color: rgba(0, 194, 255, 0.62);
+  }
+
+  .brand-input {
+    @apply w-full rounded-[10px] px-4 py-3 outline-none transition-all duration-200;
+    border: 1px solid rgba(110, 148, 205, 0.42);
+    background: rgba(15, 26, 41, 0.88);
+    color: #f7fbff;
+    font-weight: 600;
+  }
+
+  .brand-input::placeholder {
+    color: #a9bfdf;
+    opacity: 1;
+    font-weight: 600;
+  }
+
+  .brand-input:disabled {
+    color: #d6e6ff;
+    opacity: 1;
+  }
+
+  .brand-input:focus {
+    border-color: var(--brand-accent);
+    box-shadow: 0 0 0 4px rgba(0, 194, 255, 0.25);
+  }
+
+  .brand-tag {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold;
+    background: rgba(24, 38, 59, 0.95);
+    color: #edf5ff;
+  }
+
+  .brand-heading {
+    color: #f0f4fb;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .neo-card {
+    @apply relative overflow-hidden rounded-[14px] border p-4 transition-all duration-200;
+    border-color: rgba(110, 148, 205, 0.4);
+    background: linear-gradient(180deg, rgba(18, 32, 50, 0.95) 0%, rgba(12, 24, 40, 0.96) 100%);
+    box-shadow: 0 12px 20px rgba(3, 10, 20, 0.3);
+  }
+
+  .neo-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 34px rgba(8, 11, 16, 0.15);
+  }
+
+  .neo-card-header {
+    @apply mb-2 flex items-center justify-between gap-2;
+  }
+
+  .neo-card-title {
+    @apply text-[20px] leading-tight font-semibold text-[#f0f4fb];
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    letter-spacing: -0.01em;
+  }
+
+  .neo-card-subtitle {
+    @apply text-[12px] uppercase tracking-[0.08em] text-[#d1def3];
+  }
+
+  .neo-card-line {
+    @apply mt-2 text-[15px] leading-7 text-[#e2ebf9];
+  }
+
+  .neo-card-meta {
+    @apply mt-4 flex items-center gap-3 text-[13px] text-[#d3def0];
+  }
+
+  .neo-card-strip {
+    @apply absolute bottom-0 left-0 h-[8px] w-full;
+    background: linear-gradient(90deg, #00c2ff 0%, #ff5a36 100%);
+  }
+
+  .neo-accent-teal {
+    background: #00c2ff;
+  }
+
+  .neo-accent-lime {
+    background: #ff7a3d;
+  }
+
+  .neo-accent-violet {
+    background: #4bc2ff;
+  }
+
+  .neo-accent-amber {
+    background: #ff5a36;
+  }
+
+  .status-chip {
+    @apply inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold;
+    border: 1px solid rgba(110, 148, 205, 0.42);
+    background: rgba(15, 26, 41, 0.9);
+    color: #f0f6ff;
+  }
+
+  .status-chip-dot {
+    @apply h-2.5 w-2.5 rounded-full;
+  }
+
+  .kanban-column {
+    @apply rounded-[12px] border p-3;
+    border-color: rgba(110, 148, 205, 0.4);
+    background: rgba(13, 23, 38, 0.88);
+  }
+
+  .kanban-item {
+    @apply mb-2 block rounded-[10px] border p-3 transition-all duration-200;
+    border-color: rgba(110, 148, 205, 0.38);
+    background: rgba(20, 34, 52, 0.94);
+    box-shadow: 0 10px 16px rgba(6, 12, 22, 0.24);
+  }
+
+  .kanban-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .kanban-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 22px rgba(12, 14, 24, 0.13);
+  }
+
+  .page-frame > * {
+    animation: rise-in 420ms ease both;
+  }
+
+  .page-frame > *:nth-child(2) {
+    animation-delay: 90ms;
+  }
+
+  .page-frame > *:nth-child(3) {
+    animation-delay: 160ms;
+  }
+
+  @keyframes rise-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+
+  .bg-brand-ink {
+    background-color: var(--brand-ink);
+  }
+}

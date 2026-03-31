@@ -1,0 +1,16 @@
+{
+  "name": "autogestion-netlify-firebase",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "npm --prefix frontend run build"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.7.0",
+    "firebase-admin": "^12.7.0",
+    "jsonwebtoken": "^9.0.2",
+    "lambda-multipart-parser": "^1.0.1",
+    "uuid": "^11.1.0"
+  }
+}
