@@ -72,7 +72,10 @@ function getPath(event) {
   const rawPath = event.path || '/';
   const withoutFn = rawPath.replace(/^\/\.netlify\/functions\/api/, '');
   const withoutApi = withoutFn.replace(/^\/api/, '');
-  return withoutApi || '/';
+  const normalized = (withoutApi || '/')
+    .replace(/\/+/g, '/')
+    .replace(/\/$/, '');
+  return normalized || '/';
 }
 
 async function ensureAdminUser() {
@@ -170,20 +173,48 @@ async function deleteStoragePath(fileData) {
   }
 }
 
+function resolveDocId(doc) {
+  const data = doc.data() || {};
+  const dataIdNumber = Number(data.id);
+  if (Number.isFinite(dataIdNumber)) return dataIdNumber;
+
+  const docIdNumber = Number(doc.id);
+  if (Number.isFinite(docIdNumber)) return docIdNumber;
+
+  if (typeof data.id === 'string' && data.id.trim()) return data.id;
+  return String(doc.id);
+}
+
 function mapCarDoc(doc) {
-  return { id: Number(doc.id), ...doc.data() };
+  const data = doc.data() || {};
+  return { ...data, id: resolveDocId(doc) };
 }
 
 function mapRepairDoc(doc) {
-  return { id: Number(doc.id), ...doc.data() };
+  const data = doc.data() || {};
+  return { ...data, id: resolveDocId(doc) };
 }
 
 function mapPhotoDoc(doc) {
-  return { id: Number(doc.id), ...doc.data() };
+  const data = doc.data() || {};
+  return { ...data, id: resolveDocId(doc) };
 }
 
 function mapRepairDocumentDoc(doc) {
-  return { id: Number(doc.id), ...doc.data() };
+  const data = doc.data() || {};
+  return { ...data, id: resolveDocId(doc) };
+}
+
+function compareAscBy(field) {
+  return (left, right) => {
+    const leftValue = left?.[field] || '';
+    const rightValue = right?.[field] || '';
+    return String(leftValue).localeCompare(String(rightValue));
+  };
+}
+
+function compareDescBy(field) {
+  return (left, right) => compareAscBy(field)(right, left);
 }
 
 async function handleLogin(event) {
@@ -243,18 +274,18 @@ async function getCarById(carId) {
 
   const car = mapCarDoc(carSnap);
 
-  const photosSnap = await db().collection('car_photos').where('car_id', '==', car.id).orderBy('created_at').get();
-  const photos = photosSnap.docs.map(mapPhotoDoc);
+  const photosSnap = await db().collection('car_photos').where('car_id', '==', car.id).get();
+  const photos = photosSnap.docs.map(mapPhotoDoc).sort(compareAscBy('created_at'));
 
-  const repairsSnap = await db().collection('repairs').where('car_id', '==', car.id).orderBy('date', 'desc').get();
+  const repairsSnap = await db().collection('repairs').where('car_id', '==', car.id).get();
   const repairs = [];
 
-  for (const repairDoc of repairsSnap.docs) {
-    const repair = mapRepairDoc(repairDoc);
-    const docsSnap = await db().collection('repair_documents').where('repair_id', '==', repair.id).orderBy('created_at').get();
+  for (const repairDoc of repairsSnap.docs.map(mapRepairDoc).sort(compareDescBy('date'))) {
+    const repair = repairDoc;
+    const docsSnap = await db().collection('repair_documents').where('repair_id', '==', repair.id).get();
     repairs.push({
       ...repair,
-      documents: docsSnap.docs.map(mapRepairDocumentDoc),
+      documents: docsSnap.docs.map(mapRepairDocumentDoc).sort(compareAscBy('created_at')),
     });
   }
 
@@ -410,8 +441,8 @@ async function carStats(carId) {
   if (!carSnap.exists) return json(404, { error: 'Auto no encontrado' });
   const car = carSnap.data();
 
-  const repairsSnap = await db().collection('repairs').where('car_id', '==', Number(carId)).orderBy('date').get();
-  const repairs = repairsSnap.docs.map(mapRepairDoc);
+  const repairsSnap = await db().collection('repairs').where('car_id', '==', Number(carId)).get();
+  const repairs = repairsSnap.docs.map(mapRepairDoc).sort(compareAscBy('date'));
 
   const byTypeMap = {};
   const byMonthMap = {};
@@ -452,15 +483,14 @@ async function carStats(carId) {
 }
 
 async function listRepairsByCar(carId) {
-  const repairsSnap = await db().collection('repairs').where('car_id', '==', Number(carId)).orderBy('date', 'desc').get();
+  const repairsSnap = await db().collection('repairs').where('car_id', '==', Number(carId)).get();
   const output = [];
 
-  for (const repairDoc of repairsSnap.docs) {
-    const repair = mapRepairDoc(repairDoc);
+  for (const repair of repairsSnap.docs.map(mapRepairDoc).sort(compareDescBy('date'))) {
     const docsSnap = await db().collection('repair_documents').where('repair_id', '==', repair.id).get();
     output.push({
       ...repair,
-      documents: docsSnap.docs.map(mapRepairDocumentDoc),
+      documents: docsSnap.docs.map(mapRepairDocumentDoc).sort(compareAscBy('created_at')),
     });
   }
 
@@ -654,28 +684,40 @@ exports.handler = async (event) => {
 
     verifyToken(event);
 
-    if (event.httpMethod === 'GET' && path === '/cars') return await listCars();
-    if (event.httpMethod === 'GET' && /^\/cars\/\d+$/.test(path)) return await getCarById(path.split('/')[2]);
-    if (event.httpMethod === 'POST' && path === '/cars') return await createCar(event);
-    if (event.httpMethod === 'PUT' && /^\/cars\/\d+$/.test(path)) return await updateCar(event, path.split('/')[2]);
-    if (event.httpMethod === 'DELETE' && /^\/cars\/\d+$/.test(path)) return await deleteCar(path.split('/')[2]);
+    const carDetailMatch = path.match(/^\/cars\/([^/]+)$/);
+    const carUpdateMatch = path.match(/^\/cars\/([^/]+)$/);
+    const carDeleteMatch = path.match(/^\/cars\/([^/]+)$/);
+    const carPhotosMatch = path.match(/^\/cars\/([^/]+)\/photos$/);
+    const carPhotoDeleteMatch = path.match(/^\/cars\/([^/]+)\/photos\/([^/]+)$/);
+    const carStatsMatch = path.match(/^\/cars\/([^/]+)\/stats$/);
+    const repairsByCarMatch = path.match(/^\/repairs\/car\/([^/]+)$/);
+    const repairUpdateMatch = path.match(/^\/repairs\/([^/]+)$/);
+    const repairDeleteMatch = path.match(/^\/repairs\/([^/]+)$/);
+    const repairDocumentsMatch = path.match(/^\/repairs\/([^/]+)\/documents$/);
+    const repairDocumentUpdateMatch = path.match(/^\/repairs\/documents\/([^/]+)$/);
+    const repairDocumentDeleteMatch = path.match(/^\/repairs\/documents\/([^/]+)$/);
 
-    if (event.httpMethod === 'POST' && /^\/cars\/\d+\/photos$/.test(path)) return await uploadPhotos(event, path.split('/')[2]);
-    if (event.httpMethod === 'DELETE' && /^\/cars\/\d+\/photos\/\d+$/.test(path)) {
-      const parts = path.split('/');
-      return await deletePhoto(parts[2], parts[4]);
+    if (event.httpMethod === 'GET' && path === '/cars') return await listCars();
+    if (event.httpMethod === 'GET' && carDetailMatch) return await getCarById(carDetailMatch[1]);
+    if (event.httpMethod === 'POST' && path === '/cars') return await createCar(event);
+    if (event.httpMethod === 'PUT' && carUpdateMatch) return await updateCar(event, carUpdateMatch[1]);
+    if (event.httpMethod === 'DELETE' && carDeleteMatch) return await deleteCar(carDeleteMatch[1]);
+
+    if (event.httpMethod === 'POST' && carPhotosMatch) return await uploadPhotos(event, carPhotosMatch[1]);
+    if (event.httpMethod === 'DELETE' && carPhotoDeleteMatch) {
+      return await deletePhoto(carPhotoDeleteMatch[1], carPhotoDeleteMatch[2]);
     }
 
-    if (event.httpMethod === 'GET' && /^\/cars\/\d+\/stats$/.test(path)) return await carStats(path.split('/')[2]);
+    if (event.httpMethod === 'GET' && carStatsMatch) return await carStats(carStatsMatch[1]);
 
-    if (event.httpMethod === 'GET' && /^\/repairs\/car\/\d+$/.test(path)) return await listRepairsByCar(path.split('/')[3]);
-    if (event.httpMethod === 'POST' && /^\/repairs\/car\/\d+$/.test(path)) return await createRepair(event, path.split('/')[3]);
-    if (event.httpMethod === 'PUT' && /^\/repairs\/\d+$/.test(path)) return await updateRepair(event, path.split('/')[2]);
-    if (event.httpMethod === 'DELETE' && /^\/repairs\/\d+$/.test(path)) return await deleteRepair(path.split('/')[2]);
+    if (event.httpMethod === 'GET' && repairsByCarMatch) return await listRepairsByCar(repairsByCarMatch[1]);
+    if (event.httpMethod === 'POST' && repairsByCarMatch) return await createRepair(event, repairsByCarMatch[1]);
+    if (event.httpMethod === 'PUT' && repairUpdateMatch) return await updateRepair(event, repairUpdateMatch[1]);
+    if (event.httpMethod === 'DELETE' && repairDeleteMatch) return await deleteRepair(repairDeleteMatch[1]);
 
-    if (event.httpMethod === 'POST' && /^\/repairs\/\d+\/documents$/.test(path)) return await uploadRepairDocuments(event, path.split('/')[2]);
-    if (event.httpMethod === 'PUT' && /^\/repairs\/documents\/\d+$/.test(path)) return await updateDocument(event, path.split('/')[3]);
-    if (event.httpMethod === 'DELETE' && /^\/repairs\/documents\/\d+$/.test(path)) return await deleteDocument(path.split('/')[3]);
+    if (event.httpMethod === 'POST' && repairDocumentsMatch) return await uploadRepairDocuments(event, repairDocumentsMatch[1]);
+    if (event.httpMethod === 'PUT' && repairDocumentUpdateMatch) return await updateDocument(event, repairDocumentUpdateMatch[1]);
+    if (event.httpMethod === 'DELETE' && repairDocumentDeleteMatch) return await deleteDocument(repairDocumentDeleteMatch[1]);
 
     return json(404, { error: 'Ruta no encontrada' });
   } catch (err) {
